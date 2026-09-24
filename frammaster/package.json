@@ -1,0 +1,17 @@
+{
+  "name": "frammaster",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+               "build:css": "npx tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch"
+    },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
