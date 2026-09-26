@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from Framer.views import Landing_page
+from Framer.views import Landing_page, signup_view
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
    path('', Landing_page, name='landing_page'),
    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+   path('signup/', signup_view, name='signup'),
 ]

@@ -30,7 +30,13 @@
     </label>
   </div>
 
-  <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center shadow-sm">Submit</button>
+  <button type="submit" 
+  class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center shadow-sm">
+  Submit</button>
+
+  <div class="mt-4 text-sm text-gray-600">
+    Don't have an account? <a href="{% url 'signup' %}" class="text-blue-600 hover:underline font-medium">Create one here</a>
+  </div>
 </form>
 </body>
 </html>
