@@ -38,5 +38,46 @@
     Don't have an account? <a href="{% url 'signup' %}" class="text-blue-600 hover:underline font-medium">Create one here</a>
   </div>
 </form>
+<script>
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Stop standard form submission/page reload
+
+        // Grab values from inputs
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const errorDiv = document.getElementById('error-message');
+
+        // Reset error message
+        errorDiv.classList.add('hidden');
+        errorDiv.textContent = '';
+
+        try {
+            const response = await fetch('/api/login/', { // Change to your exact API endpoint URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Included for Django security
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // Login successful! Redirect user (e.g., to dashboard)
+                window.location.href = '/dashboard/'; 
+            } else {
+                // Show error returned from API
+                errorDiv.textContent = data.error || "Login failed. Please check your credentials.";
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            errorDiv.textContent = "A network error occurred. Please try again.";
+            errorDiv.classList.remove('hidden');
+        }
+    });
+</script>
 </body>
 </html>
