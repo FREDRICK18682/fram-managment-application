@@ -8,11 +8,14 @@
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 <body>
-<form class="max-w-sm mx-auto" method="POST">
+<form class="max-w-sm mx-auto" method="POST" id="login-form">
   
   {% csrf_token %}
 
-<div class="mb-5">
+  <!-- ADDED: This is the error-message div that line 53 needs -->
+  <div id="error-message" class="hidden mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg"></div>
+
+  <div class="mb-5">
     <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Your email</label>
     <input type="email" id="email" name="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400 shadow-sm" placeholder="name@flowbite.com" required />
   </div>
@@ -23,7 +26,6 @@
   </div>
 
   <div class="flex items-center mb-5">
-  
     <input id="remember" name="remember" type="checkbox" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300" />
     <label for="remember" class="ms-2 text-sm font-medium text-gray-900 select-none">
       I agree with the <a href="#" class="text-blue-600 hover:underline">terms and conditions</a>.
@@ -38,44 +40,51 @@
     Don't have an account? <a href="{% url 'signup' %}" class="text-blue-600 hover:underline font-medium">Create one here</a>
   </div>
 </form>
+
 <script>
     document.getElementById('login-form').addEventListener('submit', async function(e) {
-        e.preventDefault(); // Stop standard form submission/page reload
+        console.log("Submit button was clicked!");
+        e.preventDefault(); 
 
-        // Grab values from inputs
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         const errorDiv = document.getElementById('error-message');
 
-        // Reset error message
-        errorDiv.classList.add('hidden');
-        errorDiv.textContent = '';
+        // FIXED: Added safety check so it won't crash if errorDiv is missing
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+        }
 
         try {
-            const response = await fetch('/api/login/', { // Change to your exact API endpoint URL
+            const response = await fetch('/api/login/', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken // Included for Django security
+                    'X-CSRFToken': csrfToken 
                 },
                 body: JSON.stringify({ email, password })
             });
 
             const data = await response.json();
+            console.log("Full data from API:", data);
 
             if (response.ok) {
-                // Login successful! Redirect user (e.g., to dashboard)
-                window.location.href = '/dashboard/'; 
+                console.log("Redirect URL is:", data.redirect_url);
+                window.location.href = data.redirect_url; 
             } else {
-                // Show error returned from API
-                errorDiv.textContent = data.error || "Login failed. Please check your credentials.";
-                errorDiv.classList.remove('hidden');
+                if (errorDiv) {
+                    errorDiv.textContent = data.error || "Login failed. Please check your credentials.";
+                    errorDiv.classList.remove('hidden');
+                }
             }
         } catch (error) {
             console.error('Network error:', error);
-            errorDiv.textContent = "A network error occurred. Please try again.";
-            errorDiv.classList.remove('hidden');
+            if (errorDiv) {
+                errorDiv.textContent = "A network error occurred. Please try again.";
+                errorDiv.classList.remove('hidden');
+            }
         }
     });
 </script>

@@ -4,8 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import UserProfileSerializer
-from django.contrib.auth import authenticate, get_user_model
-
+from django.contrib.auth import authenticate, get_user_model, login
+# to fetch the current active user model
+User = get_user_model()
 
 # Create your views here.
 def Landing_page(request):
@@ -28,31 +29,38 @@ def create_user_api(request):
 class logingAPIView(APIView):
     def post(self, request):
         email = request.data.get('email')
-        password  = request.data.get('password')
-        #check if the Email and password fired have beening filled
+        password = request.data.get('password')
+        
         if not email or not password:
             return Response(
-                {"error":"Both Email and Password are rquired"},
+                {"error": "Both Email and Password are required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-         # to safly check if the email and password exist  and if not it gracefully catches the error and set the user to none
-        try:
-            user_obj = user.object.get(email=email)
-            user = authenticate(request, username=user_obj.username, password=password)
-        except user.DoesNotExist:
-            user=None
 
-        if user is not None:
-            #the Authentication was successfull
+        try:
+            # 1. Find user by email
+            user_obj = User.objects.get(email=email)
+            
+            # 2. Check if the password matches the hashed password in database
+            if user_obj.check_password(password):
+                # 3. Log them in and create the session
+                login(request, user_obj)
+                return Response(
+                    {
+                        "message": "login successful",
+                        "email": user_obj.email,
+                        "redirect_url": "/landing/"
+                    },
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {"error": "Invalid email or password."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+        except User.DoesNotExist:
             return Response(
-                {
-                    "message":"login successful",
-                    "email":user.email,
-                },
-                status=status.HTTP_200_OK
-            )
-        else:
-            return Response(
-                {"error": "Invalide email and password."},
+                {"error": "Invalid email or password."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
+        
